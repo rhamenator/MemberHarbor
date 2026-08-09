@@ -1,11 +1,13 @@
 # MemberHarbor
 
-An organization-neutral membership/dues core recovered from YUMA1 concepts:
-initiation, dues standing, life membership, drop/reinstatement, expulsion,
-deceased status, and card eligibility.
+An organization-neutral membership and dues core covering initiation, dues
+standing, life membership, drop/reinstatement, expulsion, deceased status,
+and card eligibility.
 
-YUMA1 was a separate project from `clubproject`. This repository has no
-`clubproject` lineage.
+Member identity uses a standardized `PersonalName` model with title, first
+name, middle initial(s), last name, suffix, and preferred display name. The
+preferred display name is used when supplied; otherwise a conventional full
+name is assembled from the component fields.
 
 ```powershell
 cargo test

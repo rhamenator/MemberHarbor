@@ -2,9 +2,64 @@
 pub struct Date(pub u32);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PersonalName {
+    pub title: Option<String>,
+    pub first_name: String,
+    pub middle_initials: Vec<String>,
+    pub last_name: String,
+    pub suffix: Option<String>,
+    pub preferred_display_name: Option<String>,
+}
+
+impl PersonalName {
+    pub fn display_name(&self) -> String {
+        if let Some(preferred) = self
+            .preferred_display_name
+            .as_deref()
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+        {
+            return preferred.to_owned();
+        }
+
+        let mut parts = Vec::new();
+        if let Some(title) = self
+            .title
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+        {
+            parts.push(title);
+        }
+        if !self.first_name.trim().is_empty() {
+            parts.push(self.first_name.trim());
+        }
+        parts.extend(
+            self.middle_initials
+                .iter()
+                .map(String::as_str)
+                .map(str::trim)
+                .filter(|initial| !initial.is_empty()),
+        );
+        if !self.last_name.trim().is_empty() {
+            parts.push(self.last_name.trim());
+        }
+        if let Some(suffix) = self
+            .suffix
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+        {
+            parts.push(suffix);
+        }
+        parts.join(" ")
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Member {
     pub number: String,
-    pub name: String,
+    pub personal_name: PersonalName,
     pub initiated_on: Option<Date>,
     pub dues_paid_through: Option<Date>,
     pub dropped_on: Option<Date>,
@@ -54,7 +109,7 @@ impl Member {
             format!(
                 "{} | {} | {}",
                 self.number,
-                self.name,
+                self.personal_name.display_name(),
                 if self.life_member { "LIFE" } else { "MEMBER" }
             )
         })
@@ -68,7 +123,14 @@ mod tests {
     fn member() -> Member {
         Member {
             number: "1042".into(),
-            name: "Synthetic Member".into(),
+            personal_name: PersonalName {
+                title: Some("Dr.".into()),
+                first_name: "Synthetic".into(),
+                middle_initials: vec!["Q.".into(), "R.".into()],
+                last_name: "Member".into(),
+                suffix: Some("Jr.".into()),
+                preferred_display_name: None,
+            },
             initiated_on: Some(Date(20200101)),
             dues_paid_through: Some(Date(20261231)),
             dropped_on: None,
@@ -94,5 +156,25 @@ mod tests {
         member.life_member = true;
         member.dues_paid_through = None;
         assert!(member.card_label(Date(20260401)).is_some());
+    }
+
+    #[test]
+    fn full_display_name_uses_standard_name_components() {
+        let member = member();
+        assert_eq!(
+            member.personal_name.display_name(),
+            "Dr. Synthetic Q. R. Member Jr."
+        );
+    }
+
+    #[test]
+    fn preferred_display_name_takes_precedence() {
+        let mut member = member();
+        member.personal_name.preferred_display_name = Some("S. Member".into());
+        assert_eq!(member.personal_name.display_name(), "S. Member");
+        assert_eq!(
+            member.card_label(Date(20260401)).as_deref(),
+            Some("1042 | S. Member | MEMBER")
+        );
     }
 }
