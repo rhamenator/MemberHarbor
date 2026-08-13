@@ -2,3 +2,17 @@
 name = "member-harbor"
 version = "0.1.0"
 edition = "2024"
+authors = ["Richard M. Hamilton"]
+description = "Membership administration and dues-standing application"
+repository = "https://github.com/rhamenator/MemberHarbor"
+
+[package.metadata.wix]
+upgrade-guid = "421E4FAB-0352-452E-B995-2ED4F7338C12"
+path-guid = "2A56C6C6-7A77-4F96-9A0E-8E0826106D28"
+license = false
+eula = false
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
