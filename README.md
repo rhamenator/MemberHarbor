@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/logo.png" alt="MemberHarbor logo" width="220">
+</p>
+
 # MemberHarbor
 
 An organization-neutral membership and dues core covering initiation, dues
